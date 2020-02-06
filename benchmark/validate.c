@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
     {
         if(op == 'S')
         {
+            printf("data: %s\n", data);
             strcpy(obj[(int)object_id],data);
             memset(data,0,max_size_of_objects);
         } else if (op == 'G') {
@@ -54,6 +55,7 @@ int main(int argc, char *argv[])
             break;
         }
     }
+    /*
     devfd = open("/dev/npheap",O_RDWR);
     if(devfd < 0)
     {
@@ -85,6 +87,7 @@ int main(int argc, char *argv[])
     if(error == 0)
         fprintf(stderr,"Pass\n");
     close(devfd);
+    */
     return 0;
 }
 

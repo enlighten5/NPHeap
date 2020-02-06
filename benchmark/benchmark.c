@@ -14,8 +14,8 @@ int main(int argc, char *argv[])
 {
     int i=0,number_of_processes = 1, number_of_objects=1024, max_size_of_objects = 8192 ,j; 
     int a;
-    int pid;
-    int size;
+    int pid = 1;
+    int size = 521;
     char data[8192];
     char filename[256];
     char *mapped_data;
@@ -37,6 +37,13 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Device open failed");
         exit(1);
     }
+    mapped_data = (char *)npheap_alloc(devfd,10,size);
+    printf("mapping offset %d to %p\n", i, mapped_data);
+    sprintf(mapped_data, "test");
+    char *mapped_data2;
+    mapped_data2 = (char *)npheap_alloc(devfd,11,size);
+    printf("mapping offset %d to %p, content %s\n", i, mapped_data2, mapped_data2);
+    /*
     // Writing to objects
     for(i=0;i<(number_of_processes-1) && pid != 0;i++)
     {
@@ -48,12 +55,14 @@ int main(int argc, char *argv[])
     for(i = 0; i < number_of_objects; i++)
     {
         npheap_lock(devfd,i);
-        size = npheap_getsize(devfd,i);
+        //size = npheap_getsize(devfd,i);
+        size = 512;
         while(size ==0 || size <= 10)
         {
             size = rand() % max_size_of_objects;
         }
-        mapped_data = (char *)npheap_alloc(devfd,i,size);
+        //mapped_data = (char *)npheap_alloc(devfd,i,size);
+        mapped_data = (char *)malloc(size);
         if(!mapped_data)
         {
             fprintf(stderr,"Failed in npheap_alloc()\n");
@@ -79,6 +88,9 @@ int main(int argc, char *argv[])
     close(devfd);
     if(pid != 0)
         wait(NULL);
+        */
+    close(devfd);
+
     return 0;
 }
 
