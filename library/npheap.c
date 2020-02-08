@@ -10,7 +10,9 @@
 void *npheap_alloc(int devfd, __u64 offset, __u64 size)
 {
      __u64 aligned_size= ((size + getpagesize() - 1) / getpagesize())*getpagesize();
-     return mmap(0,aligned_size,PROT_READ|PROT_WRITE,MAP_SHARED,devfd,offset*getpagesize());
+     void *p = mmap(0,aligned_size,PROT_READ|PROT_WRITE,MAP_SHARED,devfd,offset*getpagesize());
+     //printf("allocte %p\n", p);
+     return p;
 }
 int npheap_lock(int devfd, __u64 offset)
 {

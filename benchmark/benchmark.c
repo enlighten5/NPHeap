@@ -37,13 +37,35 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Device open failed");
         exit(1);
     }
+    // test code
+    /*
     mapped_data = (char *)npheap_alloc(devfd,10,size);
     printf("mapping offset %d to %p\n", i, mapped_data);
     sprintf(mapped_data, "test");
     char *mapped_data2;
-    mapped_data2 = (char *)npheap_alloc(devfd,11,size);
+    mapped_data2 = (char *)npheap_alloc(devfd,10,size);
     printf("mapping offset %d to %p, content %s\n", i, mapped_data2, mapped_data2);
-    /*
+    
+    for (i = 0; i < number_of_objects; i++) {
+        npheap_lock(devfd, i);
+        //size = npheap_getsize(devfd, i);
+        size = 10;
+        mapped_data = npheap_alloc(devfd, i, size);
+        sprintf(mapped_data, "npheap%d", i);
+        //printf("testing lock at %d, size %d, at %s\n", i, size, mapped_data);
+        npheap_unlock(devfd,i);
+    }
+    for (i = 0; i < number_of_objects; i++) {
+        npheap_lock(devfd, i);
+        //size = npheap_getsize(devfd, i);
+        size = 10;
+        mapped_data = npheap_alloc(devfd, i, size);
+        printf("testing lock at %d, size %d, at %s\n", i, size, mapped_data);
+        npheap_unlock(devfd,i);
+    }*/
+    //npheap_unlock(devfd, 0);
+#ifndef ANY
+   
     // Writing to objects
     for(i=0;i<(number_of_processes-1) && pid != 0;i++)
     {
@@ -55,14 +77,14 @@ int main(int argc, char *argv[])
     for(i = 0; i < number_of_objects; i++)
     {
         npheap_lock(devfd,i);
-        //size = npheap_getsize(devfd,i);
-        size = 512;
+        size = npheap_getsize(devfd,i);
+        
         while(size ==0 || size <= 10)
         {
             size = rand() % max_size_of_objects;
         }
-        //mapped_data = (char *)npheap_alloc(devfd,i,size);
-        mapped_data = (char *)malloc(size);
+        mapped_data = (char *)npheap_alloc(devfd,i,size);
+        //mapped_data = (char *)malloc(size);
         if(!mapped_data)
         {
             fprintf(stderr,"Failed in npheap_alloc()\n");
@@ -71,26 +93,32 @@ int main(int argc, char *argv[])
         memset(mapped_data, 0, size);
         a = rand()+1;
         gettimeofday(&current_time, NULL);
+        //sprintf(mapped_data, "pid %d i %d", (int)getpid(), i);
+        //fprintf(fp, "process: %d, write %s\n", (int)getpid(), mapped_data);
+        
         for(j = 0; j < size-10; j=strlen(mapped_data))
         {
             sprintf(mapped_data,"%s%d",mapped_data,a);
         }
+        //printf("mapped data %s\n", mapped_data);
         fprintf(fp,"S\t%d\t%ld\t%d\t%lu\t%s\n",pid,current_time.tv_sec * 1000000 + current_time.tv_usec,i,strlen(mapped_data),mapped_data);
         npheap_unlock(devfd,i);
+        //printf("finish %d pid :%d\n", i, (int)getpid());
     }
     
+#endif
+/*
     // try delete something
     i = rand()%256;
     npheap_lock(devfd,i);
     npheap_delete(devfd,i);
     fprintf(fp,"D\t%d\t%ld\t%d\t%lu\t%s\n",pid,current_time.tv_sec * 1000000 + current_time.tv_usec,i,strlen(mapped_data),mapped_data);
     npheap_unlock(devfd,i);
+    */
     close(devfd);
     if(pid != 0)
         wait(NULL);
-        */
-    close(devfd);
-
+    //close(devfd);
     return 0;
 }
 

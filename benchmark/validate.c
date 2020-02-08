@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     number_of_objects = atoi(argv[1]);
     if(argc > 2)
         max_size_of_objects = atoi(argv[2]);
+    int number_of_processes = atoi(argv[3]);
     data = (char *)malloc(max_size_of_objects*sizeof(char));
     obj = (char **)malloc(number_of_objects*sizeof(char *));
     for(i = 0; i < number_of_objects; i++)
@@ -35,11 +36,14 @@ int main(int argc, char *argv[])
     }
     // Replay the log
     // Validate
+    int total_size = number_of_objects * (number_of_processes - 1);
+    int count = 0;
     while(scanf("%c %d %llu %llu %ld %s",&op, &tid, &current_time, &object_id, &size, &data[0])!=EOF)
     {
+        if (count++ < total_size)
+            continue;
         if(op == 'S')
         {
-            printf("data: %s\n", data);
             strcpy(obj[(int)object_id],data);
             memset(data,0,max_size_of_objects);
         } else if (op == 'G') {
@@ -55,7 +59,7 @@ int main(int argc, char *argv[])
             break;
         }
     }
-    /*
+
     devfd = open("/dev/npheap",O_RDWR);
     if(devfd < 0)
     {
@@ -86,8 +90,9 @@ int main(int argc, char *argv[])
     }
     if(error == 0)
         fprintf(stderr,"Pass\n");
+
     close(devfd);
-    */
+
     return 0;
 }
 

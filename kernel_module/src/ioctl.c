@@ -46,14 +46,32 @@
 
 extern struct miscdevice npheap_dev;
 
+static DEFINE_MUTEX(mylock);
+
 int npheap_mmap(struct file *filp, struct vm_area_struct *vma)
 {
+    size_t size = vma->vm_end - vma->vm_start;
+    phys_addr_t offset = (phys_addr_t)vma->vm_pgoff << PAGE_SHIFT;
+
+    if (offset >> PAGE_SHIFT != vma->vm_pgoff)
+        return -EINVAL;
+    if(offset + (phys_addr_t)size -1 < offset)
+        return -EINVAL;
+
+    //vma->vm_page_prot = phys_mem_access_prot(filp, vma->vm_pgoff, size, vma->vm_page_prot);
+    //vma->vm_ops = npheap_dev.fops;
+    if (remap_pfn_range(vma, vma->vm_start, vma->vm_pgoff, size, vma->vm_page_prot)) {
+        return -EAGAIN;
+    }
+    unsigned long phys_addr = virt_to_phys((void *)vma->vm_start);
+    printk("virt addr: 0x%4lx, phys addr: 0x%4lx\n", vma->vm_start, phys_addr);
     return 0;
 }
 
 int npheap_init(void)
 {
     int ret;
+    printk("init npheap\n");
     if ((ret = misc_register(&npheap_dev)))
         printk(KERN_ERR "Unable to register \"npheap\" misc device\n");
     else
@@ -70,20 +88,26 @@ void npheap_exit(void)
 // If exist, return the data.
 long npheap_lock(struct npheap_cmd __user *user_cmd)
 {
+    printk("calling npheap_lock in kernel module\n");
+    mutex_lock(&mylock);
     return 0;
 }     
 
 long npheap_unlock(struct npheap_cmd __user *user_cmd)
 {
+    printk("calling npheap_unlock in kernel module\n");
+    mutex_unlock(&mylock);
     return 0;
 }
 
 long npheap_getsize(struct npheap_cmd __user *user_cmd)
 {
-    return 0;
+    printk("getsize in kernel module\n");
+    return 20;
 }
 long npheap_delete(struct npheap_cmd __user *user_cmd)
 {
+    printk("delete in kernel module\n");
     return 0;
 }
 
